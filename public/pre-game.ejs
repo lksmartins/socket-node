@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sala <%= hash %> - Desafio SAP</title>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.1.3/socket.io.js"></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js" integrity="sha512-qTXRIMyZIFb8iQcfjXWCO8+M5Tbc38Qi5WzdPOYZHIlZpzBHG3L3by84BBBOiRGiEb7KKtAOAs5qYdUiZiQNNQ==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment-timezone/0.5.33/moment-timezone-with-data-1970-2030.min.js" integrity="sha512-FOmgceoy0+6TMqXphk6oiZ6OkbF0yKaapTE6TSFwixidHNPt3yVnR3IRIxJR60+JWHzsx4cSpYutBosZ8iBA1g==" crossorigin="anonymous"></script>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" integrity="sha512-iBBXm8fW90+nuLcSKlbmrPcLa0OT92xO1BIsZ+ywDWZCvqsWgccV3gFoRBv0z+8dLJgyAHIhR35VZc2oM/gI1w==" crossorigin="anonymous" />
+
+    <link rel="stylesheet" href="styles/styles.css">
+</head>
+<body>
+
+    <input type="hidden" id="hash" value="<%= hash %>" />
+    <input type="hidden" id="room" value="<%= room %>" />
+    <input type="hidden" id="group" value="<%= group %>" />
+    
+    <div id=getsContent>
+        HASH: <%= hash %>
+        <br>
+        <div class="players"></div>
+        <div class="timer">15:00</div>
+    </div>
+
+    <script type="text/javascript">
+
+        const hash = $('#hash').val()
+
+        const host = window.location.hostname == 'localhost' ? 'http://'+window.location.hostname+':3000' : 'https://'+window.location.hostname
+        var socket = io(host, {
+            withCredentials: true,
+            extraHeaders: {
+                "roomHash": "/sala/"+hash
+            }
+        })
+
+        const getsContent = $('#getsContent')
+        let maxPlayers = 0
+        
+        let room = JSON.parse( $('#room').val() )
+        let group = JSON.parse( $('#group').val() )
+
+        console.log( 'hash', hash, room, group )
+
+        socket.emit('addInfoToSocket', room)
+
+        // if room == null - sala invalida
+        if( room == null ){
+            timerCallback( 'Essa sala não existe, você será redirecionado para o lobby em ', 10, ()=>{window.location.replace(host)} )
+        }
+        else{
+            if( group != undefined && group != '' ){
+                room.group = group
+            }
+            socket.emit('checkVacancy', room)
+        }
+
+        function timerCallback( message, time, callback ){
+
+            let secondsPassed = time
+
+            let interval = setInterval(function(){ 
+
+                getsContent.html( message+'<span class="time">'+secondsPassed+'</span>' )
+
+                if( secondsPassed == 0){
+                    clearInterval(interval)
+                    callback()
+                }
+
+                secondsPassed--
+                
+            }, 1000);
+
+        }
+
+        socket.on('leaveRoom', function(room) {
+            timerCallback( 'Não há mais vagas disponíveis, você será redirecionado para o lobby em ', 10, ()=>{window.location.replace(host)} )
+        })
+
+        function renderPlayers(players, max){
+            $('.players').html(`${players}/${max}`)
+        }
+
+        socket.on('updatingRoom', function(thisRoom) {
+            console.log( 'updatingRoom', room, thisRoom )
+            room = thisRoom
+            renderPlayers(thisRoom.players, thisRoom.group.room_size)
+
+            timer( thisRoom.group.time_to_start )
+        })
+
+        socket.on('updatingGroup', function(thisGroup) {
+            console.log( 'updatingGroup' )
+            room.group = thisGroup
+
+            timer( thisGroup.time_to_start )
+        })
+
+        
+
+        var myTimer
+
+        function timer( then ){
+
+            stopTimer()
+
+            if( then == null ) return
+
+            //format dates
+            then = cleanDate( then )
+            var now = cleanDate( new Date() )
+
+            console.log(now, then)
+
+            let duration = Math.abs( then - now ) / 1000
+
+            if( duration <= 0 ){ return }
+
+            const display = $('.timer')
+
+            myTimer = setInterval(function () {
+
+                minutes = parseInt(duration / 60, 10)
+                seconds = parseInt(duration % 60, 10)
+
+                minutes = minutes < 10 ? "0" + minutes : minutes
+                seconds = seconds < 10 ? "0" + seconds : seconds
+
+                display.html(`${minutes}:${seconds}`)
+
+                if (--duration < 0) {
+                    clearInterval(myTimer)
+                    display.html('00:00')
+                }
+
+            }, 1000);
+        }
+
+        function stopTimer(){
+            console.log('stopTimer')
+            clearInterval(myTimer)
+        }
+
+        function cleanDate( date ){
+            date = moment( date ).tz("America/Sao_Paulo").toDate()
+            return date
+        }
+
+    </script>
+    
+</body>
+</html>

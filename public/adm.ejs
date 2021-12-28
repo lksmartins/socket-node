@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adm - Desafio SAP</title>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js" integrity="sha512-894YE6QWD5I59HgZOGReFYm4dnWc1Qt5NtvYSaNcOP+u1T9qYdvdihz0PPSiiqn/+/3e7Jo4EaG7TubfWGUrMQ==" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.1.3/socket.io.js"></script>
+
+    <link rel="stylesheet" href="styles/styles.css">
+</head>
+<body>
+
+    <input type="hidden" id="group" value="<%= group %>" />
+
+    <div class="content">
+        <input type="text" id="time" value="15" /> em minutos
+        <br>
+        <button type="button" onclick="updateTimeStart()">Começar tempo</button>
+    </div>
+
+    <script type="text/javascript">
+
+        let host = window.location.hostname == 'localhost' ? 'http://'+window.location.hostname+':3000' : 'https://'+window.location.hostname
+
+        const group = JSON.parse( $('#group').val() )
+        const maxPlayers = group.room_size
+
+        console.log('group', group)
+
+        var socket = io(host)
+
+        function updateTimeStart(  ){
+            var group_id = group.id
+            var time = $('#time').val()
+            socket.emit('updateTimeStart', { group_id: group_id, time:time } )
+        }
+
+    </script>
+    
+</body>
+</html>
