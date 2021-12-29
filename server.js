@@ -51,20 +51,7 @@ io.on('connection', async (socket)=>{
 
     console.log(`socket conectado: ${socket.id}`)
 
-    /*
-    -> general
-    clicked on poi
-    tried a password right/wrong
-    solved a puzzle
-    entered a room
-    clicked on inventory item
-    asked for a clue
-
-    -> custom events
-
-    */
-
-    const { clicked_on_poi, tried_password } = require('./src/events/general')
+    const {clicked_on_poi,tried_password,correct_password,entered_room} = require('./src/events/general')
 
     socket.on('clicked-on-poi', async function (poiId) {
         clicked_on_poi(socket, poiId)
@@ -72,6 +59,14 @@ io.on('connection', async (socket)=>{
 
     socket.on('tried-password', async function (poiId, password) {
         tried_password(socket, poiId, password)
+    })
+
+    socket.on('correct-password', async function (poiId, password) {
+        correct_password(socket, poiId, password)
+    })
+
+    socket.on('entered-room', async function (roomName) {
+        entered_room(socket, roomName)
     })
 
     socket.on('disconnecting', async function () {
