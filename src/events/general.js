@@ -13,7 +13,7 @@ asked for a clue
 module.exports = {
 
     clicked_on_poi(socket, poiId){
-        console.log(`clicked-on-poi: ${socket.id}`, poiId)
+        //console.log(`clicked-on-poi: ${socket.id}`, poiId)
         PeopleAnalytics.store( { 
             action_type: 'clicked-on-poi', 
             ref_id: poiId, 
