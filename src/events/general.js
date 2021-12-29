@@ -1,3 +1,5 @@
+const PeopleAnalytics = require('../services/PeopleAnalyticsService')
+
 /*
 -> general
 clicked on poi
@@ -6,17 +8,23 @@ solved a puzzle
 entered a room
 clicked on inventory item
 asked for a clue
-
--> custom events
-
 */
 
-const clicked_on_poi = (socket, poiId)=>{
-    console.log(`clicked-on-poi: ${socket.id}`, poiId)
-}
+module.exports = {
 
-const tried_password = (socket, poiId, password)=>{
-    console.log(`tried_password: ${socket.id}`, poiId, password)
-}
+    clicked_on_poi(socket, poiId){
+        console.log(`clicked-on-poi: ${socket.id}`, poiId)
+        PeopleAnalytics.store( { 
+            action_type: 'clicked-on-poi', 
+            ref_id: poiId, 
+            action: 'example', 
+            player_id: '1', 
+            room_id: '1' 
+        } )
+    },
 
-module.exports = { clicked_on_poi, tried_password }
+    tried_password(socket, poiId, password){
+        console.log(`tried_password: ${socket.id}`, poiId, password)
+    }
+
+}

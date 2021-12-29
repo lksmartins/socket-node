@@ -1,6 +1,5 @@
 require('dotenv').config()
 
-const e = require('express')
 const express = require('express')
 const http = require("http")
 const app = express()
@@ -45,6 +44,8 @@ process.on('unhandledRejection', (err) => {
     console.error(err);
     process.exit(1);
 })
+
+require('./src/database')
 
 io.on('connection', async (socket)=>{
 
