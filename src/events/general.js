@@ -24,7 +24,14 @@ module.exports = {
     },
 
     tried_password(socket, poiId, password){
-        console.log(`tried_password: ${socket.id}`, poiId, password)
+        //console.log(`tried_password: ${socket.id}`, poiId, password)
+        PeopleAnalytics.store( { 
+            action_type: 'tried-password', 
+            ref_id: poiId, 
+            action: password, 
+            player_id: '1', 
+            room_id: '1' 
+        } )
     }
 
 }
