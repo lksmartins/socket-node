@@ -42,4 +42,9 @@ module.exports = {
         storeAction( 'entered-room', roomName )
     },
 
+    opened_inventory(socket, itemId){
+        //console.log(`correct_password: ${socket.id}`, poiId, password)
+        storeAction( 'opened-inventory', itemId )
+    },
+
 }

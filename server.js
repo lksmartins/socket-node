@@ -51,7 +51,7 @@ io.on('connection', async (socket)=>{
 
     console.log(`socket conectado: ${socket.id}`)
 
-    const {clicked_on_poi,tried_password,correct_password,entered_room} = require('./src/events/general')
+    const {clicked_on_poi,tried_password,correct_password,entered_room,opened_inventory} = require('./src/events/general')
 
     socket.on('clicked-on-poi', async function (poiId) {
         clicked_on_poi(socket, poiId)
@@ -68,6 +68,10 @@ io.on('connection', async (socket)=>{
     socket.on('entered-room', async function (roomName) {
         entered_room(socket, roomName)
     })
+
+    socket.on('opened-inventory', async function (itemId) {
+        opened_inventory(socket, itemId)
+    })    
 
     socket.on('disconnecting', async function () {
 
